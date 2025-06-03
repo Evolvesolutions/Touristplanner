@@ -110,7 +110,7 @@ class TouristRecommendationAPI(APIView):
             top_places = places[:5]
 
             # DeepInfra API for descriptions
-            deepinfra_api_key = "yAtCijMrOUgpj8BfFaebI28MHbb0zhDk"
+            deepinfra_api_key = "Lfvt18aAcrC2h6arBb6J5daTBTnFdFp5"
             deepinfra_url = "https://api.deepinfra.com/v1/openai/chat/completions"
             headers = {
                 "Authorization": f"Bearer {deepinfra_api_key}",
