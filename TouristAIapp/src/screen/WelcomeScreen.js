@@ -1,21 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Image,
+  TextInput,
   TouchableOpacity,
   Dimensions,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
 const WelcomeScreen = ({ navigation }) => {
+  const [isLogin, setIsLogin] = useState(true); // toggle login/register
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleAuth = async () => {
+    const url = isLogin
+      ? 'http://127.0.0.1:8000/api/login/'
+      : 'http://127.0.0.1:8000/api/register/';
+
+    try {
+      const res = await axios.post(url, { email, password });
+
+      if (res.data.status === 'success') {
+        if (isLogin) {
+          navigation.replace('Search');
+        } else {
+          Alert.alert('Success', 'Registered! Please log in.');
+          setIsLogin(true);
+          setEmail('');
+          setPassword('');
+        }
+      } else {
+        Alert.alert('Error', res.data.message || 'Something went wrong');
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Network or server issue');
+    }
+  };
+
   return (
     <ImageBackground
-      source={require('../../assets/icon.png')} // your local background image
+      source={require('../../assets/icon.png')}
       style={styles.background}
       resizeMode="cover"
     >
@@ -24,27 +55,42 @@ const WelcomeScreen = ({ navigation }) => {
         style={styles.container}
       >
         <View style={styles.card}>
-          <Image
-            source={{
-              uri: 'https://cdn.pixabay.com/photo/2017/08/07/01/47/travel-2594852_1280.jpg',
-            }}
-            style={styles.image}
-            resizeMode="cover"
-          />
           <Text style={styles.title}>Welcome to TourMate</Text>
           <Text style={styles.subtitle}>
-            Discover top tourist attractions along your journey route.
+            {isLogin
+              ? 'Login to discover tourist places on your route.'
+              : 'Register to get started with TourMate.'}
           </Text>
 
-          <TouchableOpacity onPress={() => navigation.navigate('Search')}>
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Password"
+            value={password}
+            secureTextEntry
+            onChangeText={setPassword}
+            style={styles.input}
+          />
+
+          <TouchableOpacity onPress={handleAuth}>
             <LinearGradient
               colors={['#000000', '#ffb347']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
               style={styles.button}
             >
-              <Text style={styles.buttonText}>Get Started</Text>
+              <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Register'}</Text>
             </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+            <Text style={styles.toggleText}>
+              {isLogin
+                ? "Don't have an account? Register"
+                : 'Already have an account? Login'}
+            </Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -55,61 +101,47 @@ const WelcomeScreen = ({ navigation }) => {
 export default WelcomeScreen;
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  background: { flex: 1, width: '100%', height: '100%' },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255,255,255,0.95)',
     borderRadius: 20,
     padding: 25,
     width: width * 0.88,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 10,
-  },
-  image: {
-    width: '100%',
-    height: 120,
-    borderRadius: 16,
-    marginBottom: 25,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#1e3c72',
     textAlign: 'center',
-    marginTop: 10,
+    marginBottom: 10,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#444',
     textAlign: 'center',
-    margin: 30,
-    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+  input: {
+    width: '100%',
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+    marginVertical: 10,
+    padding: 10,
+    borderRadius: 6,
   },
   button: {
+    marginTop: 20,
     paddingVertical: 14,
     paddingHorizontal: 40,
     borderRadius: 30,
-    shadowColor: 'black',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
+    width: 200,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: 'bold',
-    textAlign: 'center',
+  buttonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+  toggleText: {
+    color: '#1e3c72',
+    marginTop: 15,
+    fontWeight: '600',
   },
 });

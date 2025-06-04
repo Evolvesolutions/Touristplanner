@@ -1,5 +1,3 @@
-// src/screen/SearchScreen.js
-
 import React, { useState } from 'react';
 import {
   View,
@@ -8,7 +6,10 @@ import {
   Button,
   StyleSheet,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons'; // Make sure to install expo vector icons or use another icon library
 
 const SearchScreen = ({ navigation }) => {
   const [startCity, setStartCity] = useState('');
@@ -20,18 +21,32 @@ const SearchScreen = ({ navigation }) => {
       return;
     }
 
-    // Navigate to recommendation screen with parameters
     navigation.navigate('TouristRecommendation', {
       startCity,
       endCity,
     });
   };
 
-  return (
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('user');
+    navigation.replace('welcome');
+  };
 
-    
+  const handleBack = () => {
+    navigation.replace('welcome'); // Navigates to the previous screen
+  };
+
+  return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tourist Route Planner</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleBack}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Tourist Route Planner</Text>
+        <TouchableOpacity onPress={handleLogout}>
+          <Text style={styles.logout}>Logout</Text>
+        </TouchableOpacity>
+      </View>
 
       <TextInput
         style={styles.input}
@@ -63,13 +78,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e3c72',
     justifyContent: 'center',
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   title: {
-    fontSize: 30,
+    fontSize: 20,
     fontWeight: 'bold',
+    color: 'white',
+    flex: 1,
     textAlign: 'center',
-    marginBottom: 30,
-    color:'white'
-    
+  },
+  logout: {
+    color: '#ff4d4d',
+    fontSize: 16,
+    fontWeight: 'bold',
+    padding: 8,
   },
   input: {
     borderWidth: 1,
@@ -77,7 +103,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 16,
     borderRadius: 8,
-    color:'white',
+    color: 'white',
   },
 });
 

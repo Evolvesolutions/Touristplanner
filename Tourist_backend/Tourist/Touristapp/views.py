@@ -164,3 +164,38 @@ class TouristRecommendationAPI(APIView):
             import traceback
             traceback.print_exc()
             return Response({"error": str(e)}, status=500)
+
+
+
+
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+@api_view(['POST'])
+def register_user(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+
+    if not email or not password:
+        return Response({'status': 'fail', 'message': 'Email and password are required.'}, status=400)
+
+    if User.objects.filter(username=email).exists():
+        return Response({'status': 'fail', 'message': 'User already exists.'}, status=400)
+
+    User.objects.create_user(username=email, email=email, password=password)
+    return Response({'status': 'success', 'message': 'User registered successfully.'})
+
+
+@api_view(['POST'])
+def login_user(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+
+    user = authenticate(username=email, password=password)  # FIXED
+
+    if user:
+        return Response({'status': 'success', 'message': 'Login successful.'})
+    else:
+        return Response({'status': 'fail', 'message': 'Invalid credentials.'}, status=400)
